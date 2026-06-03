@@ -87,25 +87,20 @@ if __name__ == "__main__":
     # 1. 네이버 DataLab 수집 → 저장
     print("▶ 네이버 DataLab 수집 중...")
     datalab = NaverDataLabCollector(naver_id, naver_secret)
-    raw = datalab.fetch_archi_vs_market()
-    _save(pd.DataFrame(datalab.parse_to_rows(raw)), source="naver_datalab")
+    rows = datalab.fetch_all()
+    _save(pd.DataFrame(rows), source="naver_datalab")
 
-    # 2. 구글 트렌드 수집 → 저장
-    print("▶ 구글 트렌드 수집 중...")
-    gtrends = GoogleTrendsCollector()
-    df_google = gtrends.fetch_archi_vs_competitors()
-    _save(pd.DataFrame(gtrends.parse_to_rows(df_google)), source="google_trends")
+   
 
     # 3. 네이버 검색 언급량 수집 → 저장
     print("▶ 네이버 검색 언급량 수집 중...")
     search = NaverSearchCollector(naver_id, naver_secret)
     _save(pd.DataFrame(search.fetch_all_brand_mentions()), source="naver_search")
 
-    # 4. 쇼핑인사이트 수집 → 저장
     print("▶ 쇼핑인사이트 수집 중...")
     shopping = NaverShoppingCollector(naver_id, naver_secret)
-    raw_shopping = shopping.fetch_archi_shopping_trend()
-    _save(pd.DataFrame(shopping.parse_to_rows(raw_shopping)), source="naver_shopping")
+    rows_shopping = shopping.fetch_all()
+    _save(pd.DataFrame(rows_shopping), source="naver_shopping")
 
     # 5. 최신 파일 로드 확인
     print("\n▶ 저장된 파일 로드 확인")
