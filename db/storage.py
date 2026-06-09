@@ -90,13 +90,22 @@ if __name__ == "__main__":
     rows = datalab.fetch_all()
     _save(pd.DataFrame(rows), source="naver_datalab")
 
-   
+    # 2. 구글 트렌드 수집 → 저장
+    print("▶ 구글 트렌드 수집 중...")
+    gtrends = GoogleTrendsCollector()
+    df_google = gtrends.fetch_archi_vs_competitors()
+    _save(pd.DataFrame(gtrends.parse_to_rows(df_google)), source="google_trends")
 
-    # 3. 네이버 검색 언급량 수집 → 저장
-    print("▶ 네이버 검색 언급량 수집 중...")
+    # 3. 네이버 검색 수집 → 저장 (4개 테이블)
+    print("▶ 네이버 검색 수집 중...")
     search = NaverSearchCollector(naver_id, naver_secret)
-    _save(pd.DataFrame(search.fetch_all_brand_mentions()), source="naver_search")
+    search_result = search.fetch_all()
+    _save(pd.DataFrame(search_result["total"]), source="mention_total")
+    _save(pd.DataFrame(search_result["blog"]),  source="mention_blog")
+    _save(pd.DataFrame(search_result["news"]),  source="mention_news")
+    _save(pd.DataFrame(search_result["cafe"]),  source="mention_cafe")
 
+    # 4. 쇼핑인사이트 수집 → 저장
     print("▶ 쇼핑인사이트 수집 중...")
     shopping = NaverShoppingCollector(naver_id, naver_secret)
     rows_shopping = shopping.fetch_all()
@@ -104,6 +113,6 @@ if __name__ == "__main__":
 
     # 5. 최신 파일 로드 확인
     print("\n▶ 저장된 파일 로드 확인")
-    for source in ["naver_datalab", "google_trends", "naver_search", "naver_shopping"]:
+    for source in ["naver_datalab", "google_trends", "mention_total", "mention_blog", "mention_news", "mention_cafe", "naver_shopping"]:
         df_check = load_latest(source)
         print(f"  {source}: {len(df_check)}행")
