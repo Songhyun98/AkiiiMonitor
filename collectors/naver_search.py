@@ -149,6 +149,11 @@ class NaverSearchCollector:
 
             print(f"     블로그 {len(blog_raw.get('items',[]))}건 / 뉴스 {len(news_raw.get('items',[]))}건 / 카페 {len(cafe_raw.get('items',[]))}건 수집 (전체: 블로그 {blog_raw.get('total',0):,} / 뉴스 {news_raw.get('total',0):,} / 카페 {cafe_raw.get('total',0):,})")
 
+        # 중복 제거 (네이버 API 페이지네이션 중복 방지)
+        result["blog"] = list({(item["keyword"], item["link"]): item for item in result["blog"]}.values())
+        result["news"] = list({(item["keyword"], item["link"]): item for item in result["news"]}.values())
+        result["cafe"] = list({(item["keyword"], item["link"]): item for item in result["cafe"]}.values())
+
         return result
 
 
