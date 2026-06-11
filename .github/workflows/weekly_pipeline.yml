@@ -2,7 +2,8 @@ name: AkiiiMonitor 주간 파이프라인
 
 on:
   schedule:
-    - cron: "0 1 * * 4"   # 매주 목요일 오전 10시 (KST = UTC+9)
+    - cron: "59 14 * * 0"   # 매주 일요일 23:59 KST
+    #- cron: "0 1 * * 4"   # 매주 목요일 오전 10시 (KST = UTC+9)
   workflow_dispatch:        # 수동 실행 버튼도 활성화
 
 jobs:
