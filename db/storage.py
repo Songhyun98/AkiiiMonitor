@@ -91,10 +91,10 @@ if __name__ == "__main__":
     _save(pd.DataFrame(rows), source="naver_datalab")
 
     # 2. 구글 트렌드 수집 → 저장
-    print("▶ 구글 트렌드 수집 중...")
-    gtrends = GoogleTrendsCollector()
-    df_google = gtrends.fetch_archi_vs_competitors()
-    _save(pd.DataFrame(gtrends.parse_to_rows(df_google)), source="google_trends")
+    # print("▶ 구글 트렌드 수집 중...")
+    # gtrends = GoogleTrendsCollector()
+    # df_google = gtrends.fetch_archi_vs_competitors()
+    # _save(pd.DataFrame(gtrends.parse_to_rows(df_google)), source="google_trends")
 
     # 3. 네이버 검색 수집 → 저장 (4개 테이블)
     print("▶ 네이버 검색 수집 중...")
