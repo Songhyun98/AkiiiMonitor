@@ -6,7 +6,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
-from scipy import stats
+# from scipy import stats
 
 st.set_page_config(page_title="아키모니터", layout="wide")
 
