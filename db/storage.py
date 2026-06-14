@@ -71,7 +71,7 @@ if __name__ == "__main__":
     load_dotenv()
 
     from collectors.naver_datalab import NaverDataLabCollector
-    from collectors.google_trends import GoogleTrendsCollector
+    # from collectors.google_trends import GoogleTrendsCollector
     from collectors.naver_search import NaverSearchCollector
     from collectors.naver_shopping import NaverShoppingCollector
 
@@ -113,6 +113,6 @@ if __name__ == "__main__":
 
     # 5. 최신 파일 로드 확인
     print("\n▶ 저장된 파일 로드 확인")
-    for source in ["naver_datalab", "google_trends", "mention_total", "mention_blog", "mention_news", "mention_cafe", "naver_shopping"]:
+    for source in ["naver_datalab", "mention_total", "mention_blog", "mention_news", "mention_cafe", "naver_shopping"]:
         df_check = load_latest(source)
         print(f"  {source}: {len(df_check)}행")
