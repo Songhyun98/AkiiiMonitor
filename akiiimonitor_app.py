@@ -145,17 +145,19 @@ def template_insight(m, sos):
 
 @st.cache_data(ttl=3600)
 def llm_insight(cache_key, sos, asof_str, m):
-    try:
-        import anthropic
-        client = anthropic.Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
-        r = client.messages.create(
-            model="claude-haiku-4-5-20251001",   # 제일 저렴한 모델
-            max_tokens=500,
-            messages=[{"role":"user","content":build_prompt(m, sos, pd.Timestamp(asof_str))}]
-        )
-        return r.content[0].text
-    except Exception:
+#     try:
+#         import anthropic
+#         client = anthropic.Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
+#         r = client.messages.create(
+#             model="claude-haiku-4-5-20251001",   # 제일 저렴한 모델
+#             max_tokens=500,
+#             messages=[{"role":"user","content":build_prompt(m, sos, pd.Timestamp(asof_str))}]
+#         )
+#         return r.content[0].text
+#     except Exception:
         return template_insight(m, sos)
+
+
 
 # ───────────────── 5. 차트 ─────────────────
 
