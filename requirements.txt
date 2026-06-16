@@ -1,6 +1,10 @@
 requests
-pandas
 pyarrow
 python-dotenv
-supabase
 pytrends
+streamlit
+pandas>=2.2
+numpy
+plotly
+supabase
+anthropic
