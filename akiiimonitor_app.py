@@ -143,19 +143,52 @@ def template_insight(m, sos):
             f"완만하나, 이는 {CAMPAIGN} 시점과 맞물리는 기저효과로 보이며, "
             f"절대 검색 수요는 역대 최고점 수준을 유지 중입니다.")
 
-@st.cache_data(ttl=3600)
-def llm_insight(cache_key, sos, asof_str, m):
-#     try:
-#         import anthropic
-#         client = anthropic.Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
-#         r = client.messages.create(
-#             model="claude-haiku-4-5-20251001",   # 제일 저렴한 모델
-#             max_tokens=500,
-#             messages=[{"role":"user","content":build_prompt(m, sos, pd.Timestamp(asof_str))}]
-#         )
-#         return r.content[0].text
-#     except Exception:
-        return template_insight(m, sos)
+import hashlib, json
+from datetime import datetime, timezone
+
+def make_cache_key(asof_str, sos, m):
+    yoy_trend_dict = {str(k): v for k, v in m["yoy_trend"].to_dict().items()}
+    payload = {
+        "asof": asof_str,
+        "sos": round(sos, 2),
+        "long": round(m["long"], 2),
+        "yoy3": round(m["yoy3"], 2),
+        "single_yoy": round(m["single_yoy"], 2),
+        "yoy_trend": yoy_trend_dict,
+    }
+    raw = json.dumps(payload, sort_keys=True)
+    return hashlib.sha256(raw.encode()).hexdigest()[:16]
+
+def llm_insight(sos, asof_str, m, force=False):
+    from supabase import create_client
+    sb = create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
+    key = make_cache_key(asof_str, sos, m)
+
+    if not force:
+        existing = sb.table("ai_insights").select("*").eq("cache_key", key).execute()
+        if existing.data:
+            return existing.data[0]["insight_text"], False
+
+    try:
+        import anthropic
+        client = anthropic.Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
+        r = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=500,
+            messages=[{"role":"user","content":build_prompt(m, sos, pd.Timestamp(asof_str))}]
+        )
+        text = r.content[0].text
+    except Exception as e:
+        st.error(f"LLM 호출 실패: {e}")
+        text = template_insight(m, sos)
+
+    sb.table("ai_insights").upsert({
+        "cache_key": key,
+        "asof_month": asof_str,
+        "insight_text": text,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+    }).execute()
+    return text, True
 
 
 
@@ -343,9 +376,10 @@ st.caption(f"브랜드 건강검진 대시보드 · 2023년 1월 ~ {ASOF:%Y년 %
 st.warning(f"{ASOF:%Y년 %m월} 마감 기준 — 데이터 수집 진행 중인 달은 모든 지표에서 자동 제외됨", icon="⚠️")
 
 # LLM 소견
-st.markdown(llm_insight(
-    f"{m['long']:.1f}_{m['yoy3']:.1f}_{sos_now:.1f}_{ASOF:%Y%m}",
-    sos_now, ASOF.isoformat(), m))
+force = st.checkbox("강제 재생성 (데이터 재수집 시 체크)")
+insight_text, was_generated = llm_insight(sos_now, ASOF.isoformat(), m, force=force)
+st.markdown(insight_text)
+st.caption("✅ 새로 생성됨" if was_generated else "📦 저장된 결과 재사용")
 
 # 상단 3지표
 c1, c2, c3 = st.columns(3)
